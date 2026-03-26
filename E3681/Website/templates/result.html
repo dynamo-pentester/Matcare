@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MatCare — Reading Result</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0A0A0B; --surface: #0F0F12; --card: #14141A;
+      --line: #1C1C24; --muted: #44445A; --sub: #7A7A90;
+      --body: #C0C0D0; --head: #EEEAE0; --gold: #C9A96E;
+      --safe: #4A8C6A; --safe-dim: rgba(74,140,106,.1);
+      --danger: #B85450; --danger-dim: rgba(184,84,80,.1);
+      --warn: #9A7840; --warn-dim: rgba(154,120,64,.1);
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--body);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+    }
+
+    /* Accent bar — changes color based on status */
+    .status-bar {
+      width: 4px;
+      min-height: 100vh;
+      flex-shrink: 0;
+    }
+    .status-bar.normal  { background: linear-gradient(to bottom, var(--safe), transparent); }
+    .status-bar.abnormal{ background: linear-gradient(to bottom, var(--danger), transparent); }
+    .status-bar.error   { background: linear-gradient(to bottom, var(--warn), transparent); }
+
+    .page {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    /* Card header */
+    .card-header {
+      padding: 2.5rem 2.5rem 2rem;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+    .status-label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .dot-normal  { background: var(--safe); }
+    .dot-abnormal{ background: var(--danger); }
+    .dot-error   { background: var(--warn); }
+    .color-normal  { color: var(--safe); }
+    .color-abnormal{ color: var(--danger); }
+    .color-error   { color: var(--warn); }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.4rem;
+      font-weight: 300;
+      line-height: 1.05;
+      color: var(--head);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .card-sub { font-size: 0.82rem; color: var(--sub); line-height: 1.6; }
+
+    .subject-pill {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 4px 14px;
+      border-radius: 3px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+    .pill-mother { border-color: rgba(201,169,110,.3); color: var(--gold); }
+    .pill-baby   { border-color: rgba(74,140,106,.3);  color: #6AB890; }
+
+    /* Readings table */
+    .readings {
+      padding: 1.5rem 2.5rem;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+    }
+    .reading {
+      background: var(--card);
+      padding: 1.2rem 1.5rem;
+    }
+    .reading:last-child { grid-column: span 3; }
+    .r-label { font-size: 0.68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .r-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; font-weight: 300;
+      color: var(--head); line-height: 1;
+    }
+    .r-unit { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+
+    /* Actions */
+    .card-actions {
+      padding: 1.5rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .btn {
+      display: block; width: 100%;
+      padding: 11px; border-radius: 5px;
+      text-align: center; text-decoration: none;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem; font-weight: 500;
+      letter-spacing: .07em; text-transform: uppercase;
+      transition: all .2s; cursor: pointer; border: none;
+    }
+    .btn-gold { background: var(--gold); color: #0A0A0B; }
+    .btn-gold:hover { opacity: .85; transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--sub);
+    }
+    .btn-ghost:hover { border-color: var(--sub); color: var(--head); }
+    .btn-danger-ghost {
+      background: transparent;
+      border: 1px solid rgba(184,84,80,.2);
+      color: #C09090;
+    }
+    .btn-danger-ghost:hover { border-color: rgba(184,84,80,.5); }
+  </style>
+</head>
+<body>
+
+{% if error %}
+  <div class="status-bar error"></div>
+{% elif prediction == 'Abnormal' %}
+  <div class="status-bar abnormal"></div>
+{% else %}
+  <div class="status-bar normal"></div>
+{% endif %}
+
+<div class="page">
+  <div class="card">
+    <div class="card-header">
+      {% if error %}
+        <div class="status-label color-error"><span class="status-dot dot-error"></span>Sensor Error</div>
+        <h1 class="card-title">Could not<br>fetch data.</h1>
+        <p class="card-sub">Sensor connection failed. Please check device and retry.</p>
+      {% elif prediction == 'Abnormal' %}
+        <div class="status-label color-abnormal"><span class="status-dot dot-abnormal"></span>Alert — Abnormal</div>
+        <h1 class="card-title">Health alert<br>detected.</h1>
+        <p class="card-sub">One or more readings fall outside normal range. Please consult a healthcare provider.</p>
+      {% else %}
+        <div class="status-label color-normal"><span class="status-dot dot-normal"></span>{{ prediction }}</div>
+        <h1 class="card-title">Vitals within<br>normal range.</h1>
+        <p class="card-sub">All sensor readings are acceptable. Continue monitoring.</p>
+      {% endif %}
+
+      {% if Switch is defined %}
+        {% if Switch == 1 %}
+          <span class="subject-pill pill-mother">Mother</span>
+        {% else %}
+          <span class="subject-pill pill-baby">Newborn</span>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    {% if Pulse is defined %}
+    <div class="readings">
+      <div class="reading">
+        <div class="r-label">Pulse</div>
+        <div class="r-value">{{ Pulse|int }}</div>
+        <div class="r-unit">bpm</div>
+      </div>
+      <div class="reading">
+        <div class="r-label">SpO₂</div>
+        <div class="r-value">{{ SPO2|int }}</div>
+        <div class="r-unit">%</div>
+      </div>
+      <div class="reading">
+        <div class="r-label">Blood Pressure</div>
+        <div class="r-value">{{ BP_Systolic|int }}</div>
+        <div class="r-unit">mmHg systolic</div>
+      </div>
+      <div class="reading">
+        <div class="r-label">Temperature</div>
+        <div class="r-value">{{ "%.1f"|format(Temperature) }}</div>
+        <div class="r-unit">°C</div>
+      </div>
+      <div class="reading">
+        <div class="r-label">Glucose</div>
+        <div class="r-value">{{ Glucose|int }}</div>
+        <div class="r-unit">mg/dL</div>
+      </div>
+      <div class="reading">
+        <div class="r-label">Switch Mode</div>
+        <div class="r-value" style="font-size:1.2rem;margin-top:4px">{{ 'Mother' if Switch == 1 else 'Baby' }}</div>
+        <div class="r-unit">Channel {{ Switch|int }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card-actions">
+      <a href="/predict" class="btn btn-gold">Take Another Reading</a>
+      <a href="/" class="btn btn-ghost">Back to Dashboard</a>
+      <a href="/logout" class="btn btn-danger-ghost">Sign Out</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

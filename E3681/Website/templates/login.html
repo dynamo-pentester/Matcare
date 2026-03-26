@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MatCare — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #0A0A0B;
+      --surface: #111113;
+      --card:    #16161A;
+      --line:    #1E1E24;
+      --muted:   #4A4A58;
+      --sub:     #8A8A9A;
+      --body:    #C8C8D8;
+      --head:    #F0EEE8;
+      --gold:    #C9A96E;
+      --gold-dim:rgba(201,169,110,.1);
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--body);
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Left panel ── */
+    .panel-left {
+      width: 48%;
+      position: relative;
+      overflow: hidden;
+      background: #0C0C10;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 3.5rem;
+    }
+
+    .panel-left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 30%, rgba(201,169,110,.07) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 80%, rgba(201,169,110,.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Animated grid lines */
+    .panel-left::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,169,110,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,169,110,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: linear-gradient(to bottom right, transparent 30%, black 80%);
+      pointer-events: none;
+    }
+
+    .brand {
+      position: absolute;
+      top: 3.5rem;
+      left: 3.5rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border: 1.5px solid var(--gold);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand-mark svg { width: 16px; height: 16px; }
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--head);
+    }
+
+    .panel-left-content { position: relative; z-index: 1; }
+    .panel-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.2rem;
+      font-weight: 300;
+      line-height: 1.1;
+      color: var(--head);
+      letter-spacing: -0.02em;
+      margin-bottom: 1.2rem;
+    }
+    .panel-tagline em { color: var(--gold); font-style: italic; }
+    .panel-desc {
+      font-size: 0.85rem;
+      color: var(--sub);
+      line-height: 1.7;
+      max-width: 320px;
+      margin-bottom: 2.5rem;
+    }
+    .panel-stats {
+      display: flex;
+      gap: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--line);
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 3px; }
+    .stat-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: var(--gold);
+    }
+    .stat-lbl { font-size: 0.72rem; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+    /* ── Right panel ── */
+    .panel-right {
+      flex: 1;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .form-container { width: 100%; max-width: 380px; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 2.5rem;
+    }
+    .tab {
+      flex: 1;
+      padding: 0 0 14px;
+      background: transparent;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      position: relative;
+      transition: color .25s;
+    }
+    .tab.active { color: var(--head); }
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+
+    .form-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--head);
+      margin-bottom: 0.3rem;
+    }
+    .form-sub { font-size: 0.82rem; color: var(--sub); margin-bottom: 2rem; }
+
+    .field { margin-bottom: 1.1rem; }
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      color: var(--head);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input::placeholder { color: var(--muted); }
+    .field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-dim);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      margin-top: 0.5rem;
+      background: var(--gold);
+      color: #0A0A0B;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-submit:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* Flash */
+    .flash-wrap {
+      position: fixed; top: 20px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 999; pointer-events: none;
+    }
+    .flash {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 0.83rem;
+      font-weight: 400;
+      animation: fadeUp .3s ease, fadeOut .4s ease 3.2s forwards;
+      backdrop-filter: blur(8px);
+    }
+    .flash.error   { background: rgba(184,84,80,.15); border: 1px solid rgba(184,84,80,.3); color: #E89090; }
+    .flash.success { background: rgba(74,140,106,.15); border: 1px solid rgba(74,140,106,.3); color: #80C8A0; }
+    @keyframes fadeUp  { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeOut { to { opacity: 0; } }
+
+    @media (max-width: 768px) {
+      body { flex-direction: column; overflow: auto; }
+      .panel-left { width: 100%; padding: 2.5rem 2rem 2rem; min-height: 260px; }
+      .panel-tagline { font-size: 2.2rem; }
+      .panel-stats { display: none; }
+      .panel-right { padding: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="flash-wrap">
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}{% for cat, msg in messages %}
+    <div class="flash {{ cat }}">{{ msg }}</div>
+  {% endfor %}{% endif %}
+{% endwith %}
+</div>
+
+<div class="panel-left">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 16 16" fill="none" stroke="#C9A96E" stroke-width="1.5">
+        <path d="M8 2v12M4 6h8M3 10h10"/>
+      </svg>
+    </div>
+    <span class="brand-name">MatCare</span>
+  </div>
+
+  <div class="panel-left-content">
+    <h1 class="panel-tagline">Maternal health,<br><em>secured on-chain.</em></h1>
+    <p class="panel-desc">Real-time vitals monitoring for mothers and newborns, with immutable health records stored on the Ethereum blockchain.</p>
+    <div class="panel-stats">
+      <div class="stat-item"><span class="stat-val">5</span><span class="stat-lbl">Vitals tracked</span></div>
+      <div class="stat-item"><span class="stat-val">24/7</span><span class="stat-lbl">Monitoring</span></div>
+      <div class="stat-item"><span class="stat-val">Sepolia</span><span class="stat-lbl">Network</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-right">
+  <div class="form-container">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('login',this)">Sign In</button>
+      <button class="tab" onclick="showTab('register',this)">Register</button>
+    </div>
+
+    <div id="tab-login" class="form-panel active">
+      <h2 class="form-heading">Welcome back</h2>
+      <p class="form-sub">Sign in to your MatCare account</p>
+      <form action="/login" method="POST">
+        <div class="field">
+          <label>Username</label>
+          <input type="text" name="username" placeholder="Enter username" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-submit">Sign In</button>
+      </form>
+    </div>
+
+    <div id="tab-register" class="form-panel">
+      <h2 class="form-heading">Create account</h2>
+      <p class="form-sub">Register using your MetaMask wallet</p>
+      <form action="/register" method="POST">
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" name="username" placeholder="Your name" required>
+        </div>
+        <div class="field">
+          <label>Wallet Address</label>
+          <input type="text" name="wallet" placeholder="0x..." required style="font-family:monospace;font-size:.82rem">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Min. 6 characters" required minlength="6">
+        </div>
+        <button type="submit" class="btn-submit">Create Account</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showTab(id, btn) {
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

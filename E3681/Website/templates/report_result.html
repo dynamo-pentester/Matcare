@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MatCare — Analysis Result</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0A0A0B; --surface: #0F0F12; --card: #14141A;
+      --line: #1C1C24; --muted: #44445A; --sub: #7A7A90;
+      --body: #C0C0D0; --head: #EEEAE0; --gold: #C9A96E;
+      --safe: #4A8C6A; --safe-dim: rgba(74,140,106,.1);
+      --danger: #B85450; --danger-dim: rgba(184,84,80,.1);
+      --warn: #9A7840; --warn-dim: rgba(154,120,64,.1);
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg); color: var(--body);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+
+    .container { width: 100%; max-width: 640px; }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .breadcrumb a { color: var(--muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--gold); }
+    .breadcrumb-sep { color: var(--line); }
+
+    /* Header card */
+    .header-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px 10px 0 0;
+      padding: 2rem 2.5rem;
+      border-bottom: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .header-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 1px;
+    }
+    .hc-normal  .header-card::before { background: var(--safe); }
+    .hc-warning .header-card::before { background: var(--warn); }
+    .hc-danger  .header-card::before { background: var(--danger); }
+
+    .status-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px;
+      border-radius: 3px;
+      font-size: 0.68rem; letter-spacing: .1em;
+      text-transform: uppercase; font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    .chip-safe    { background: var(--safe-dim); color: #70C090; border: 1px solid rgba(74,140,106,.2); }
+    .chip-warn    { background: var(--warn-dim); color: #D0A060; border: 1px solid rgba(154,120,64,.2); }
+    .chip-danger  { background: var(--danger-dim); color: #D09090; border: 1px solid rgba(184,84,80,.2); }
+    .chip-neutral { background: rgba(201,169,110,.08); color: var(--gold); border: 1px solid rgba(201,169,110,.2); }
+    .chip-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    .result-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem; font-weight: 300;
+      color: var(--head); line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    /* Data section */
+    .data-section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-top: none;
+    }
+    .data-section-head {
+      padding: 1rem 2.5rem;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.68rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .data-rows { padding: 0; }
+    .data-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2.5rem;
+      border-bottom: 1px solid var(--line);
+      transition: background .15s;
+    }
+    .data-row:last-child { border-bottom: none; }
+    .data-row:hover { background: var(--card); }
+    .d-key { font-size: 0.82rem; color: var(--sub); }
+    .d-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; font-weight: 300; color: var(--head);
+    }
+    .d-unit { font-size: 0.72rem; color: var(--muted); margin-left: 4px; }
+
+    /* Empty state */
+    .empty-state {
+      padding: 3rem 2.5rem;
+      text-align: center;
+    }
+    .empty-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--sub); margin-bottom: 0.5rem; }
+    .empty-sub { font-size: 0.8rem; color: var(--muted); }
+
+    /* Alert strip */
+    .alert-strip {
+      margin: 0;
+      padding: 1rem 2.5rem;
+      font-size: 0.82rem;
+      border-top: 1px solid var(--line);
+    }
+    .alert-normal  { color: #70C090; background: var(--safe-dim); }
+    .alert-warning { color: #D0A060; background: var(--warn-dim); }
+    .alert-danger  { color: #D09090; background: var(--danger-dim); }
+
+    /* Actions */
+    .actions {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      padding: 1.2rem 2.5rem;
+      display: flex; gap: 10px;
+    }
+    .btn {
+      flex: 1; padding: 10px;
+      border-radius: 5px; text-align: center;
+      text-decoration: none; font-family: 'Outfit', sans-serif;
+      font-size: 0.75rem; font-weight: 500;
+      letter-spacing: .07em; text-transform: uppercase;
+      transition: all .2s;
+    }
+    .btn-gold { background: var(--gold); color: #0A0A0B; }
+    .btn-gold:hover { opacity: .85; }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--line);
+      color: var(--sub);
+    }
+    .btn-ghost:hover { border-color: var(--sub); color: var(--head); }
+  </style>
+</head>
+<body>
+
+<!-- Determine alert class -->
+{% set alert_class = 'hc-normal' %}
+{% if alert %}
+  {% if 'low' in alert.lower() or 'high' in alert.lower() %}
+    {% set alert_class = 'hc-danger' if 'high' in alert.lower() else 'hc-warning' %}
+  {% endif %}
+{% endif %}
+
+<div class="container {{ alert_class }}">
+  <div class="breadcrumb">
+    <a href="/">Dashboard</a>
+    <span class="breadcrumb-sep">/</span>
+    <a href="{{ url_for('report_upload') }}">Reports</a>
+    <span class="breadcrumb-sep">/</span>
+    <span>Analysis</span>
+  </div>
+
+  <div class="header-card">
+    {% if not structured %}
+      <div class="status-chip chip-neutral"><span class="chip-dot"></span>No Data Extracted</div>
+    {% elif alert and ('low' in alert.lower()) %}
+      <div class="status-chip chip-warn"><span class="chip-dot"></span>Caution</div>
+    {% elif alert and ('high' in alert.lower()) %}
+      <div class="status-chip chip-danger"><span class="chip-dot"></span>Risk Detected</div>
+    {% elif alert %}
+      <div class="status-chip chip-safe"><span class="chip-dot"></span>Within Normal Range</div>
+    {% else %}
+      <div class="status-chip chip-neutral"><span class="chip-dot"></span>Analysis Complete</div>
+    {% endif %}
+
+    <div class="result-title">
+      {% if not structured %}
+        No structured data<br>found in document.
+      {% elif alert and ('normal' in alert.lower()) %}
+        Report readings<br>within normal range.
+      {% elif alert %}
+        Clinical flag<br>requires attention.
+      {% else %}
+        Report parsed<br>successfully.
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="data-section">
+    {% if structured %}
+      <div class="data-section-head">Extracted Values</div>
+      <div class="data-rows">
+        {% for key, value in structured.items() %}
+        <div class="data-row">
+          <span class="d-key">{{ key.replace('_', ' ').title() }}</span>
+          <span class="d-val">{{ value }}<span class="d-unit">{% if key == 'amniotic_fluid' %}cm{% elif key == 'gestational_age' %}wks{% endif %}</span></span>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-title">Nothing extracted</div>
+        <div class="empty-sub">Try uploading a clearer PDF or DOCX with labelled values</div>
+      </div>
+    {% endif %}
+
+    {% if alert %}
+      {% if 'normal' in alert.lower() %}
+        <div class="alert-strip alert-normal">{{ alert }}</div>
+      {% elif 'low' in alert.lower() %}
+        <div class="alert-strip alert-warning">{{ alert }}</div>
+      {% else %}
+        <div class="alert-strip alert-danger">{{ alert }}</div>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <div class="actions">
+    <a href="{{ url_for('report_upload') }}" class="btn btn-ghost">Upload Another</a>
+    <a href="{{ url_for('home') }}" class="btn btn-gold">Back to Dashboard</a>
+  </div>
+</div>
+</body>
+</html>

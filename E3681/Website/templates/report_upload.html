@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MatCare — Upload Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0A0A0B; --surface: #0F0F12; --card: #14141A;
+      --line: #1C1C24; --muted: #44445A; --sub: #7A7A90;
+      --body: #C0C0D0; --head: #EEEAE0; --gold: #C9A96E;
+      --gold-dim: rgba(201,169,110,.08);
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg); color: var(--body);
+      display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh;
+    }
+
+    .left {
+      position: relative; background: var(--surface);
+      border-right: 1px solid var(--line);
+      display: flex; flex-direction: column;
+      justify-content: space-between; padding: 3rem; overflow: hidden;
+    }
+    .left::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(201,169,110,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,169,110,.025) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+    .left::after {
+      content: '';
+      position: absolute; width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,169,110,.05) 0%, transparent 60%);
+      top: -150px; left: -150px; pointer-events: none;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; position: relative; z-index: 1; }
+    .brand-mark {
+      width: 28px; height: 28px; border: 1px solid var(--gold);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    }
+    .brand-mark svg { width: 13px; height: 13px; }
+    .brand-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; letter-spacing: .1em; color: var(--head); }
+    .left-content { position: relative; z-index: 1; }
+    .eyebrow {
+      font-size: 0.68rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .eyebrow::before { content: ''; display: block; width: 20px; height: 1px; background: var(--gold); }
+    .left-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem; font-weight: 300; line-height: 1.05;
+      color: var(--head); letter-spacing: -0.02em; margin-bottom: 1.2rem;
+    }
+    .left-heading em { color: var(--gold); font-style: italic; }
+    .left-desc { font-size: 0.82rem; color: var(--sub); line-height: 1.7; max-width: 280px; margin-bottom: 2rem; }
+    .feature-list { display: flex; flex-direction: column; gap: 10px; }
+    .feature-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.8rem; color: var(--sub);
+    }
+    .feature-item::before {
+      content: '';
+      width: 20px; height: 1px; background: var(--gold); flex-shrink: 0;
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      transition: color .2s; position: relative; z-index: 1;
+    }
+    .back-link:hover { color: var(--gold); }
+    .back-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+    /* Right */
+    .right {
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 4rem; overflow-y: auto;
+    }
+    .form-wrap { width: 100%; max-width: 360px; }
+    .form-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: var(--head); margin-bottom: 0.3rem; }
+    .form-sub { font-size: 0.8rem; color: var(--sub); margin-bottom: 2rem; }
+
+    .flash { padding: 10px 14px; border-radius: 5px; font-size: 0.8rem; margin-bottom: 1.5rem; }
+    .flash.error { background: rgba(184,84,80,.1); border: 1px solid rgba(184,84,80,.25); color: #D09090; }
+
+    /* Drop zone */
+    .drop-zone {
+      position: relative;
+      border: 1px dashed var(--muted);
+      border-radius: 8px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .25s, background .25s;
+      margin-bottom: 1.5rem;
+    }
+    .drop-zone.active, .drop-zone:hover {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+    }
+    .drop-icon {
+      width: 40px; height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    .drop-icon svg { width: 18px; height: 18px; stroke: var(--sub); fill: none; stroke-width: 1.5; }
+    .drop-text { font-size: 0.85rem; color: var(--head); margin-bottom: 3px; }
+    .drop-hint { font-size: 0.75rem; color: var(--muted); }
+    .drop-file { margin-top: 10px; font-size: 0.78rem; color: var(--gold); font-family: monospace; }
+
+    .capabilities {
+      display: flex; flex-direction: column; gap: 6px;
+      margin-bottom: 1.5rem;
+    }
+    .cap {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.76rem; color: var(--muted);
+      padding: 8px 12px;
+      background: var(--card);
+      border-radius: 5px;
+    }
+    .cap-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+
+    .btn-submit {
+      width: 100%; padding: 11px;
+      background: var(--gold); color: #0A0A0B;
+      border: none; border-radius: 5px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem; font-weight: 500;
+      letter-spacing: .08em; text-transform: uppercase;
+      cursor: pointer; transition: opacity .2s, transform .15s;
+    }
+    .btn-submit:hover { opacity: .85; transform: translateY(-1px); }
+
+    @media (max-width: 768px) {
+      body { grid-template-columns: 1fr; }
+      .left { display: none; }
+      .right { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="left">
+  <a href="/" class="brand">
+    <div class="brand-mark"><svg viewBox="0 0 14 14" fill="none" stroke="#C9A96E" stroke-width="1.5"><path d="M7 1v12M3 5h8M2 9h10"/></svg></div>
+    <span class="brand-name">MATCARE</span>
+  </a>
+  <div class="left-content">
+    <div class="eyebrow">Report Analysis</div>
+    <h1 class="left-heading">Intelligent<br><em>document parsing.</em></h1>
+    <p class="left-desc">Upload a maternity scan or lab report. Our system extracts key clinical indicators automatically.</p>
+    <div class="feature-list">
+      <div class="feature-item">Amniotic fluid level detection</div>
+      <div class="feature-item">Gestational age extraction</div>
+      <div class="feature-item">Placenta position mapping</div>
+      <div class="feature-item">Risk flag assessment</div>
+    </div>
+  </div>
+  <a href="/" class="back-link">
+    <svg viewBox="0 0 14 14"><path d="M10 7H4M4 7L7 4M4 7l3 3"/></svg>
+    Dashboard
+  </a>
+</div>
+
+<div class="right">
+  <div class="form-wrap">
+    <h2 class="form-title">Upload report</h2>
+    <p class="form-sub">PDF or DOCX accepted — max 10MB</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('report_upload') }}" method="POST" enctype="multipart/form-data">
+      <div class="drop-zone" id="dz">
+        <input type="file" name="report" id="fi" accept=".pdf,.docx" required>
+        <div class="drop-icon">
+          <svg viewBox="0 0 18 18"><path d="M9 12V4M9 4L6 7M9 4l3 3M3 14h12"/></svg>
+        </div>
+        <div class="drop-text">Click to select or drag file here</div>
+        <div class="drop-hint">PDF, DOCX</div>
+        <div class="drop-file" id="fn"></div>
+      </div>
+
+      <div class="capabilities">
+        <div class="cap"><span class="cap-dot"></span>Extracts structured clinical data</div>
+        <div class="cap"><span class="cap-dot"></span>Flags amniotic fluid anomalies</div>
+        <div class="cap"><span class="cap-dot"></span>No data stored permanently</div>
+      </div>
+
+      <button type="submit" class="btn-submit">Analyze Document</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const fi = document.getElementById('fi');
+  const fn = document.getElementById('fn');
+  const dz = document.getElementById('dz');
+  fi.addEventListener('change', () => { fn.textContent = fi.files[0]?.name || ''; });
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('active'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('active'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('active');
+    if (e.dataTransfer.files.length) {
+      fi.files = e.dataTransfer.files;
+      fn.textContent = fi.files[0].name;
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Node (if frontend uses it)
+node_modules/
+
+# Build / cache
+dist/
+build/
+
+# Secrets
+.env
+
+# Uploaded data (important for your project)
+uploaded/
+reports/

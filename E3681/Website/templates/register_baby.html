@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MatCare — Register Baby</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0A0A0B; --surface: #0F0F12; --card: #14141A;
+      --line: #1C1C24; --muted: #44445A; --sub: #7A7A90;
+      --body: #C0C0D0; --head: #EEEAE0; --gold: #C9A96E;
+      --gold-dim: rgba(201,169,110,.08);
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--body);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Left decorative panel */
+    .left {
+      position: relative;
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 3rem;
+      overflow: hidden;
+    }
+    .left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,169,110,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,169,110,.025) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+    .left::after {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,169,110,.05) 0%, transparent 60%);
+      bottom: -200px; right: -200px;
+      pointer-events: none;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; position: relative; z-index: 1;
+    }
+    .brand-mark {
+      width: 28px; height: 28px;
+      border: 1px solid var(--gold); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand-mark svg { width: 13px; height: 13px; }
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; letter-spacing: .1em; color: var(--head);
+    }
+    .left-content { position: relative; z-index: 1; }
+    .left-step {
+      font-size: 0.68rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .left-step::before { content: ''; display: block; width: 20px; height: 1px; background: var(--gold); }
+    .left-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem; font-weight: 300; line-height: 1.05;
+      color: var(--head); letter-spacing: -0.02em;
+      margin-bottom: 1.2rem;
+    }
+    .left-heading em { color: var(--gold); font-style: italic; }
+    .left-desc { font-size: 0.83rem; color: var(--sub); line-height: 1.7; max-width: 280px; }
+    .left-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      transition: color .2s;
+      position: relative; z-index: 1;
+    }
+    .left-back:hover { color: var(--gold); }
+    .left-back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+    /* Right form panel */
+    .right {
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 4rem;
+      overflow-y: auto;
+    }
+    .form-wrap { width: 100%; max-width: 360px; }
+
+    .flash {
+      padding: 10px 14px; border-radius: 5px;
+      font-size: 0.8rem; margin-bottom: 1.5rem;
+    }
+    .flash.error   { background: rgba(184,84,80,.12); border: 1px solid rgba(184,84,80,.25); color: #D09090; }
+    .flash.success { background: rgba(74,140,106,.12); border: 1px solid rgba(74,140,106,.25); color: #80C0A0; }
+
+    .field { margin-bottom: 1.3rem; }
+    .field label {
+      display: block; font-size: 0.7rem; font-weight: 500;
+      letter-spacing: .09em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .field input, .field select {
+      width: 100%; padding: 11px 14px;
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 5px; font-family: 'Outfit', sans-serif;
+      font-size: 0.88rem; color: var(--head); outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      appearance: none;
+    }
+    .field input::placeholder { color: var(--muted); }
+    .field input:focus, .field select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-dim);
+    }
+    .field select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%238A8A9A' stroke-width='1.5'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+    /* Custom radio for gender */
+    .radio-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    .radio-opt input[type="radio"] { display: none; }
+    .radio-opt label {
+      display: block;
+      padding: 9px 10px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--sub);
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .02em;
+    }
+    .radio-opt input[type="radio"]:checked + label {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .divider { height: 1px; background: var(--line); margin: 1.8rem 0; }
+
+    .btn-submit {
+      width: 100%; padding: 11px;
+      background: var(--gold); color: #0A0A0B;
+      border: none; border-radius: 5px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem; font-weight: 500;
+      letter-spacing: .08em; text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-submit:hover { opacity: .85; transform: translateY(-1px); }
+
+    @media (max-width: 768px) {
+      body { grid-template-columns: 1fr; }
+      .left { display: none; }
+      .right { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="left">
+  <a href="/" class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 14 14" fill="none" stroke="#C9A96E" stroke-width="1.5">
+        <path d="M7 1v12M3 5h8M2 9h10"/>
+      </svg>
+    </div>
+    <span class="brand-name">MATCARE</span>
+  </a>
+
+  <div class="left-content">
+    <div class="left-step">Step 2 of 2</div>
+    <h1 class="left-heading">Register<br>your <em>newborn.</em></h1>
+    <p class="left-desc">This creates a unique, tamper-proof identity for your baby on the Ethereum Sepolia blockchain — linked to your maternal wallet.</p>
+  </div>
+
+  <a href="/" class="left-back">
+    <svg viewBox="0 0 14 14"><path d="M10 7H4M4 7L7 4M4 7l3 3"/></svg>
+    Back to Dashboard
+  </a>
+</div>
+
+<div class="right">
+  <div class="form-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="field">
+        <label>Baby's Name</label>
+        <input type="text" name="baby_name" placeholder="Full name" required>
+      </div>
+      <div class="field">
+        <label>Date of Birth</label>
+        <input type="date" name="baby_dob" required>
+      </div>
+      <div class="field">
+        <label>Gender</label>
+        <div class="radio-group">
+          <div class="radio-opt">
+            <input type="radio" id="g-f" name="baby_gender" value="Female" required>
+            <label for="g-f">Female</label>
+          </div>
+          <div class="radio-opt">
+            <input type="radio" id="g-m" name="baby_gender" value="Male">
+            <label for="g-m">Male</label>
+          </div>
+          <div class="radio-opt">
+            <input type="radio" id="g-o" name="baby_gender" value="Other">
+            <label for="g-o">Other</label>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <button type="submit" class="btn-submit">Register on Blockchain</button>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MatCare — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #0A0A0B;
+      --surface:   #0F0F12;
+      --card:      #14141A;
+      --card-h:    #18181F;
+      --line:      #1C1C24;
+      --muted:     #44445A;
+      --sub:       #7A7A90;
+      --body:      #C0C0D0;
+      --head:      #EEEAE0;
+      --gold:      #C9A96E;
+      --gold-dim:  rgba(201,169,110,.08);
+      --gold-glow: rgba(201,169,110,.18);
+      --safe:      #4A8C6A;
+      --safe-dim:  rgba(74,140,106,.12);
+      --danger:    #B85450;
+      --danger-dim:rgba(184,84,80,.12);
+      --warn:      #9A7840;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--body);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      background: rgba(10,10,11,.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+      transition: background .3s;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-mark {
+      width: 28px; height: 28px;
+      border: 1px solid var(--gold);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo-mark svg { width: 14px; height: 14px; }
+    .nav-logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+      font-weight: 400;
+      letter-spacing: .1em;
+      color: var(--head);
+    }
+    .nav-center {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .nav-link {
+      padding: 6px 14px;
+      border-radius: 5px;
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: .04em;
+      color: var(--sub);
+      text-decoration: none;
+      transition: color .2s, background .2s;
+    }
+    .nav-link:hover { color: var(--head); background: rgba(255,255,255,.04); }
+    .nav-link.active { color: var(--gold); }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-user {
+      font-size: 0.75rem;
+      color: var(--sub);
+      letter-spacing: .04em;
+    }
+    .nav-signout {
+      padding: 5px 14px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: .04em;
+      color: var(--sub);
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .nav-signout:hover { border-color: var(--danger); color: #E09090; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      height: 100vh;
+      min-height: 600px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Parallax background layers */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, #0C0C12 0%, #0A0A0B 60%, #0C0C10 100%);
+    }
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,169,110,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,169,110,.03) 1px, transparent 1px);
+      background-size: 80px 80px;
+      will-change: transform;
+    }
+    .hero-orb-1 {
+      position: absolute;
+      width: 800px; height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,169,110,.06) 0%, transparent 65%);
+      top: -200px; right: -100px;
+      will-change: transform;
+    }
+    .hero-orb-2 {
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74,140,106,.05) 0%, transparent 65%);
+      bottom: -100px; left: 200px;
+      will-change: transform;
+    }
+    .hero-line-v {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(201,169,110,.08) 40%, rgba(201,169,110,.08) 60%, transparent);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 0 2.5rem;
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+      padding-top: 56px;
+    }
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 24px; height: 1px;
+      background: var(--gold);
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 300;
+      line-height: 1.0;
+      color: var(--head);
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+    .hero-title em { color: var(--gold); font-style: italic; }
+
+    /* Latest vitals strip */
+    .hero-vitals {
+      display: flex;
+      gap: 0;
+      margin-top: 3rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      max-width: 760px;
+      background: rgba(14,14,18,.75);
+      backdrop-filter: blur(12px);
+    }
+    .vital-item {
+      flex: 1;
+      padding: 1.3rem 1.6rem;
+      border-right: 1px solid var(--line);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .vital-item:last-child { border-right: none; }
+    .vital-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .vital-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .vital-lbl {
+      font-size: 0.64rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .vital-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.1rem;
+      font-weight: 300;
+      color: var(--head);
+      line-height: 1;
+    }
+    .vital-unit {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 5px;
+      letter-spacing: .03em;
+    }
+    .vital-time {
+      font-size: 0.64rem;
+      color: var(--muted);
+      margin-top: 3px;
+      opacity: .6;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, var(--muted), transparent);
+      animation: scrollLine 2s ease-in-out infinite;
+    }
+    @keyframes scrollLine {
+      0%, 100% { opacity: .3; transform: scaleY(.5); transform-origin: top; }
+      50%       { opacity: 1;  transform: scaleY(1);  transform-origin: top; }
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 5rem 2.5rem 6rem;
+    }
+
+    /* Section header */
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      margin-bottom: 1.8rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      color: var(--head);
+      letter-spacing: -0.01em;
+    }
+    .section-meta {
+      font-size: 0.72rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .section-tag {
+      margin-left: auto;
+      padding: 3px 10px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      font-size: 0.7rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--sub);
+    }
+    .tag-mother { border-color: rgba(201,169,110,.3); color: var(--gold); }
+    .tag-baby   { border-color: rgba(74,140,106,.3);  color: #6AB890; }
+
+    /* Quick actions */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 5rem;
+      border: 1px solid var(--line);
+    }
+    .action-tile {
+      background: var(--card);
+      padding: 1.6rem 1.8rem;
+      text-decoration: none;
+      color: var(--body);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: background .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .action-tile::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .3s ease;
+    }
+    .action-tile:hover { background: var(--card-h); }
+    .action-tile:hover::after { transform: scaleX(1); }
+    .action-tile:hover .action-arrow { transform: translate(3px, -3px); }
+
+    .action-icon {
+      width: 36px; height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .action-icon svg { width: 16px; height: 16px; stroke: var(--gold); fill: none; stroke-width: 1.5; }
+    .action-label { font-size: 0.88rem; font-weight: 500; color: var(--head); }
+    .action-desc  { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+    .action-arrow {
+      margin-top: auto;
+      align-self: flex-end;
+      width: 20px; height: 20px;
+      stroke: var(--muted);
+      fill: none;
+      stroke-width: 1.5;
+      transition: transform .2s;
+    }
+
+    /* Gauges */
+    .gauge-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      margin-bottom: 4rem;
+    }
+    .gauge-cell {
+      background: var(--card);
+      padding: 1.5rem 1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background .2s;
+    }
+    .gauge-cell:hover { background: var(--card-h); }
+    canvas.gauge { width: 100% !important; max-width: 110px; }
+    .gauge-name {
+      font-size: 0.7rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* No data */
+    .empty {
+      grid-column: 1 / -1;
+      background: var(--card);
+      padding: 3rem;
+      text-align: center;
+    }
+    .empty-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--sub); margin-bottom: 0.5rem; }
+    .empty-sub { font-size: 0.8rem; color: var(--muted); }
+    .empty-link { color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(201,169,110,.3); }
+
+    /* Fade-in on scroll */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1024px) {
+      .actions-grid { grid-template-columns: repeat(2, 1fr); }
+      .gauge-grid   { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 640px) {
+      nav { padding: 0 1.2rem; }
+      .nav-center { display: none; }
+      main { padding: 4rem 1.2rem 4rem; }
+      .actions-grid { grid-template-columns: 1fr 1fr; }
+      .gauge-grid   { grid-template-columns: repeat(2, 1fr); }
+      .hero-vitals  { flex-wrap: wrap; }
+      .vital-item   { flex: 0 0 50%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 14 14" fill="none" stroke="#C9A96E" stroke-width="1.5">
+        <path d="M7 1v12M3 5h8M2 9h10"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">MATCARE</span>
+  </a>
+  <div class="nav-center">
+    <a href="/predict" class="nav-link active">Live Stats</a>
+    <a href="/register-baby" class="nav-link">Register Baby</a>
+    <a href="/report_upload" class="nav-link">Reports</a>
+    <a href="/verify" class="nav-link">Verify</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user">{{ username }}</span>
+    <a href="/logout" class="nav-signout">Sign Out</a>
+  </div>
+</nav>
+
+<!-- HERO with parallax -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid" id="parallax-grid"></div>
+  <div class="hero-orb-1" id="parallax-orb1"></div>
+  <div class="hero-orb-2" id="parallax-orb2"></div>
+  <div class="hero-line-v"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">Health Overview</div>
+    <h1 class="hero-title">
+      Good day,<br><em>{{ username }}.</em>
+    </h1>
+
+    {% if mother_data %}
+    <div class="hero-vitals">
+      <div class="vital-item">
+        <div class="vital-header">
+          <span class="vital-dot" style="background:{% if mother_data.pulse < 60 or mother_data.pulse > 100 %}var(--danger){% else %}var(--safe){% endif %}"></span>
+          <span class="vital-lbl">Pulse</span>
+        </div>
+        <div class="vital-val">{{ mother_data.pulse|int }}</div>
+        <div class="vital-unit">bpm</div>
+      </div>
+      <div class="vital-item">
+        <div class="vital-header">
+          <span class="vital-dot" style="background:{% if mother_data.spo2 < 95 %}var(--danger){% else %}var(--safe){% endif %}"></span>
+          <span class="vital-lbl">SpO₂</span>
+        </div>
+        <div class="vital-val">{{ mother_data.spo2|int }}</div>
+        <div class="vital-unit">percent</div>
+      </div>
+      <div class="vital-item">
+        <div class="vital-header">
+          <span class="vital-dot" style="background:{% if mother_data.bp < 80 or mother_data.bp > 140 %}var(--danger){% else %}var(--safe){% endif %}"></span>
+          <span class="vital-lbl">BP</span>
+        </div>
+        <div class="vital-val">{{ mother_data.bp|int }}</div>
+        <div class="vital-unit">mmHg systolic</div>
+      </div>
+      <div class="vital-item">
+        <div class="vital-header">
+          <span class="vital-dot" style="background:{% if mother_data.temp < 36 or mother_data.temp > 38 %}var(--danger){% else %}var(--safe){% endif %}"></span>
+          <span class="vital-lbl">Temp</span>
+        </div>
+        <div class="vital-val">{{ "%.1f"|format(mother_data.temp) }}</div>
+        <div class="vital-unit">degrees Celsius</div>
+        <div class="vital-time">{{ mother_data.time_ago }}</div>
+      </div>
+      <div class="vital-item">
+        <div class="vital-header">
+          <span class="vital-dot" style="background:{% if mother_data.glucose < 70 or mother_data.glucose > 140 %}var(--danger){% else %}var(--safe){% endif %}"></span>
+          <span class="vital-lbl">Glucose</span>
+        </div>
+        <div class="vital-val">{{ mother_data.glucose|int }}</div>
+        <div class="vital-unit">mg/dL</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="hero-vitals">
+      <div class="vital-item" style="flex:1;padding:1.6rem 2rem">
+        <div class="vital-lbl" style="margin-bottom:8px">No readings yet</div>
+        <div style="font-size:.8rem;color:var(--muted)">Take a live reading to populate vitals</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- Quick actions -->
+  <div class="section-head reveal">
+    <span class="section-title">Quick Actions</span>
+  </div>
+  <div class="actions-grid reveal">
+    <a href="/predict" class="action-tile">
+      <div class="action-icon">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+      </div>
+      <div>
+        <div class="action-label">Live Reading</div>
+        <div class="action-desc">Fetch sensor data in real-time</div>
+      </div>
+      <svg class="action-arrow" viewBox="0 0 16 16"><path d="M3 13L13 3M7 3h6v6"/></svg>
+    </a>
+    <a href="/register-baby" class="action-tile">
+      <div class="action-icon">
+        <svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 14c0-3 2-5 5-5s5 2 5 5"/></svg>
+      </div>
+      <div>
+        <div class="action-label">Register Baby</div>
+        <div class="action-desc">Add to the blockchain</div>
+      </div>
+      <svg class="action-arrow" viewBox="0 0 16 16"><path d="M3 13L13 3M7 3h6v6"/></svg>
+    </a>
+    <a href="/report_upload" class="action-tile">
+      <div class="action-icon">
+        <svg viewBox="0 0 16 16"><path d="M4 2h6l3 3v9H4V2z"/><path d="M10 2v4h3M6 8h5M6 11h5"/></svg>
+      </div>
+      <div>
+        <div class="action-label">Analyze Report</div>
+        <div class="action-desc">Upload PDF or DOCX</div>
+      </div>
+      <svg class="action-arrow" viewBox="0 0 16 16"><path d="M3 13L13 3M7 3h6v6"/></svg>
+    </a>
+    <a href="/verify" class="action-tile">
+      <div class="action-icon">
+        <svg viewBox="0 0 16 16"><path d="M8 2L3 5v4c0 3 2 5 5 6 3-1 5-3 5-6V5z"/><path d="M5.5 8l2 2 3-3"/></svg>
+      </div>
+      <div>
+        <div class="action-label">Verify Wallet</div>
+        <div class="action-desc">Check blockchain records</div>
+      </div>
+      <svg class="action-arrow" viewBox="0 0 16 16"><path d="M3 13L13 3M7 3h6v6"/></svg>
+    </a>
+  </div>
+
+  <!-- Mother vitals -->
+  <div class="section-head reveal" style="margin-top:1rem">
+    <span class="section-title">Mother Vitals</span>
+    <span class="section-meta">Last 5 readings</span>
+    <span class="section-tag tag-mother">Mother</span>
+  </div>
+  <div class="gauge-grid reveal">
+    {% if mother_history %}
+      <div class="gauge-cell"><canvas id="mPulse" class="gauge"></canvas><span class="gauge-name">Pulse</span></div>
+      <div class="gauge-cell"><canvas id="mSpo2" class="gauge"></canvas><span class="gauge-name">SpO₂</span></div>
+      <div class="gauge-cell"><canvas id="mBp" class="gauge"></canvas><span class="gauge-name">Blood Pressure</span></div>
+      <div class="gauge-cell"><canvas id="mTemp" class="gauge"></canvas><span class="gauge-name">Temperature</span></div>
+      <div class="gauge-cell"><canvas id="mGlucose" class="gauge"></canvas><span class="gauge-name">Glucose</span></div>
+    {% else %}
+      <div class="empty">
+        <div class="empty-title">No readings recorded</div>
+        <div class="empty-sub">Take a <a href="/predict" class="empty-link">live reading</a> to populate vitals</div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Baby vitals -->
+  <div class="section-head reveal">
+    <span class="section-title">Baby Vitals{% if baby_name %} &mdash; {{ baby_name }}{% endif %}</span>
+    <span class="section-meta">Last 5 readings</span>
+    <span class="section-tag tag-baby">Newborn</span>
+  </div>
+  <div class="gauge-grid reveal">
+    {% if baby_history %}
+      <div class="gauge-cell"><canvas id="bPulse" class="gauge"></canvas><span class="gauge-name">Pulse</span></div>
+      <div class="gauge-cell"><canvas id="bSpo2" class="gauge"></canvas><span class="gauge-name">SpO₂</span></div>
+      <div class="gauge-cell"><canvas id="bBp" class="gauge"></canvas><span class="gauge-name">Blood Pressure</span></div>
+      <div class="gauge-cell"><canvas id="bTemp" class="gauge"></canvas><span class="gauge-name">Temperature</span></div>
+      <div class="gauge-cell"><canvas id="bGlucose" class="gauge"></canvas><span class="gauge-name">Glucose</span></div>
+    {% else %}
+      <div class="empty">
+        <div class="empty-title">No baby readings recorded</div>
+        <div class="empty-sub">Register a baby and take a reading with Switch set to 0</div>
+      </div>
+    {% endif %}
+  </div>
+
+</main>
+
+<script>
+  // Parallax
+  const grid = document.getElementById('parallax-grid');
+  const orb1 = document.getElementById('parallax-orb1');
+  const orb2 = document.getElementById('parallax-orb2');
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    grid.style.transform  = `translateY(${y * 0.3}px)`;
+    orb1.style.transform  = `translateY(${y * 0.5}px)`;
+    orb2.style.transform  = `translateY(${y * 0.2}px)`;
+  }, { passive: true });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Gauges
+  const mH = {{ mother_history|tojson }};
+  const bH = {{ baby_history|tojson }};
+
+  function gaugeColor(v, lo, hi) {
+    if (v < lo) return '#9A7840';
+    if (v > hi) return '#B85450';
+    return '#4A8C6A';
+  }
+
+  function buildGauge(id, val, max, lo, hi) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const c = gaugeColor(val, lo, hi);
+    new Chart(el, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [val, Math.max(0, max - val)],
+          backgroundColor: [c, '#1C1C24'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        cutout: '74%', circumference: 180, rotation: -90,
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } }
+      },
+      plugins: [{
+        id: 'lbl',
+        beforeDraw(chart) {
+          const { ctx, chartArea: { width, height } } = chart;
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.fillStyle = c;
+          ctx.font = '500 17px Outfit';
+          const disp = val % 1 === 0 ? val : val.toFixed(1);
+          ctx.fillText(disp, width / 2, height / 1.35);
+          ctx.restore();
+        }
+      }]
+    });
+  }
+
+  function v(h, i) { return h.length ? (parseFloat(h[0][i]) || 0) : 0; }
+
+  window.addEventListener('load', () => {
+    buildGauge('mPulse',   v(mH,0), 160, 60, 100);
+    buildGauge('mSpo2',    v(mH,1), 100, 95, 100);
+    buildGauge('mBp',      v(mH,2), 180, 80, 140);
+    buildGauge('mTemp',    v(mH,3),  42, 36,  38);
+    buildGauge('mGlucose', v(mH,4), 200, 70, 140);
+    buildGauge('bPulse',   v(bH,0), 180, 110, 160);
+    buildGauge('bSpo2',    v(bH,1), 100,  95, 100);
+    buildGauge('bBp',      v(bH,2), 120,  50,  90);
+    buildGauge('bTemp',    v(bH,3),  42,  36,  38);
+    buildGauge('bGlucose', v(bH,4), 150,  40,  80);
+  });
+</script>
+</body>
+</html>

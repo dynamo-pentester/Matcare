@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-docx
+pdfplumber
+pandas
+psycopg2-binary
+python-dotenv
